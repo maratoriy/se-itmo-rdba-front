@@ -43,6 +43,7 @@ const ProjectsPage = () => {
             setSuccess('Project created successfully!');
             setTimeout(() => setSuccess(''), 3000);
             handleClose();
+            navigate(`/projects/${newProject.id}`);
         } catch (error) {
             setError('Failed to create project: ' + error.message);
         }
