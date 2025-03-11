@@ -28,6 +28,7 @@ const Sidebar = () => {
                 <Nav className="flex-column">
                     <Nav.Link as={Link} to="/">Home</Nav.Link>
                     <Nav.Link as={Link} to="/projects">Projects</Nav.Link>
+                    <Nav.Link as={Link} to="/all-tasks">Assigned tasks</Nav.Link>
                 </Nav>
             </div>
             <Button variant="danger" className="m-3" onClick={handleLogout}>

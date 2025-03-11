@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Alert, Card, Spinner, Form, Row, Button, Modal } from 'react-bootstrap';
-import { useParams, useNavigate } from 'react-router-dom';
-import { TaskControllerService, ProjectControllerService } from '../api-client';
+import { Container, Alert, Card, Spinner, Form, Row, Button, Modal, ListGroup } from 'react-bootstrap';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { TaskControllerService, ProjectControllerService, CommentControllerService } from '../api-client';
 import ReactMarkdown from 'react-markdown';
 import moment from 'moment';
 
@@ -9,6 +9,10 @@ const TaskDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [task, setTask] = useState(null);
+    const [project, setProject] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [newCommentContent, setNewCommentContent] = useState('');
+    const [editingComment, setEditingComment] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [editingField, setEditingField] = useState('');
@@ -19,6 +23,7 @@ const TaskDetailPage = () => {
     const [assignedUserId, setAssignedUserId] = useState('');
     const [projectUsers, setProjectUsers] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [commentError, setCommentError] = useState('');
 
     useEffect(() => {
         const fetchTask = async () => {
@@ -30,8 +35,16 @@ const TaskDetailPage = () => {
                 setUpdatedStatus(response.status);
                 setUpdatedPriority(response.priority);
                 setAssignedUserId(response.assignedUser?.id || '');
+
+                if (response.projectId) {
+                    const projectResponse = await ProjectControllerService.getProjectById(response.projectId);
+                    setProject(projectResponse);
+                    fetchProjectUsers(response.projectId);
+                }
+
+                fetchComments(id);
             } catch (err) {
-                setError('Error loading task: ' + err.message);
+                setError('Error loading task or project: ' + err.message);
             }
         };
 
@@ -44,11 +57,17 @@ const TaskDetailPage = () => {
             }
         };
 
+        const fetchComments = async (taskId) => {
+            try {
+                const commentsData = await CommentControllerService.getCommentsByTaskId(taskId);
+                setComments(commentsData);
+            } catch (err) {
+                setError('Error loading comments: ' + err.message);
+            }
+        };
+
         fetchTask();
-        if (task?.projectId) {
-            fetchProjectUsers(task.projectId);
-        }
-    }, [id, task?.projectId]);
+    }, [id]);
 
     const handleUpdate = async (field, value) => {
         try {
@@ -74,10 +93,30 @@ const TaskDetailPage = () => {
         }
     };
 
+    const handleCreateComment = async () => {
+        try {
+            const newCommentObject = await CommentControllerService.createComment({ content: newCommentContent, taskId: parseInt(id) });
+            setComments([...comments, newCommentObject]);
+            setNewCommentContent('');
+        } catch (err) {
+            setCommentError('Error creating comment: ' + err.message);
+        }
+    };
+
+    const handleEditComment = async (commentId, content) => {
+        try {
+            await CommentControllerService.updateComment(commentId, { content, taskId: parseInt(id) });
+            setComments(comments.map(comment => (comment.id === commentId ? { ...comment, content } : comment)));
+            setEditingComment(null);
+        } catch (err) {
+            setCommentError('Error editing comment: ' + err.message);
+        }
+    };
+
     const humanReadableDate = (date) => moment(date).format('MMMM Do YYYY, h:mm:ss a');
 
     return (
-        <Container className="mt-5">
+        <Container className="mt-5 full-page-scroll">
             {success && (
                 <Alert variant="success" className="position-fixed top-0 end-0 m-3" style={{ zIndex: 1 }}>
                     {success}
@@ -86,21 +125,26 @@ const TaskDetailPage = () => {
             {error && <Alert variant="danger">{error}</Alert>}
 
             {!task ? (
-                <div className="d-flex justify-content-center align-items-center mt-5">
-                    <Spinner animation="border" role="status">
-                        <span>Loading...</span>
-                    </Spinner>
-                </div>
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </Spinner>
             ) : (
                 <>
+                    <Row className="mb-3">
+                        <h6 className="text-muted">
+                            {project ? (
+                                <Link to={`/projects/${project.id}`} className="text-decoration-none">
+                                    {project.name}
+                                </Link>
+                            ) : (
+                                'Project'
+                            )} / {task.title}
+                        </h6>
+                    </Row>
                     <Card className="shadow-sm border-0 mb-4">
                         <Card.Body>
-                            <div
-                                onClick={() => setEditingField('title')}
-                                className="editable-field"
-                                style={{ cursor: 'pointer', borderBottom: editingField === 'title' ? '1px dashed #007bff' : 'none' }}
-                            >
-                                <Card.Title className="display-5 mb-3">
+                            <div onClick={() => setEditingField('title')}>
+                                <Card.Title className="display-5 mb-3 editable-field" style={{ cursor: 'pointer', borderBottom: editingField === 'title' ? '1px dashed #007bff' : 'none' }}>
                                     {editingField === 'title' ? (
                                         <Form.Control
                                             type="text"
@@ -117,11 +161,7 @@ const TaskDetailPage = () => {
                                     )}
                                 </Card.Title>
                             </div>
-                            <div
-                                className="editable-field mb-3"
-                                style={{ cursor: 'pointer', borderBottom: editingField === 'description' ? '1px dashed #007bff' : 'none' }}
-                                onClick={() => setEditingField('description')}
-                            >
+                            <div onClick={() => setEditingField('description')}>
                                 {editingField === 'description' ? (
                                     <Form.Control
                                         as="textarea"
@@ -194,7 +234,7 @@ const TaskDetailPage = () => {
                                     ))}
                                 </Form.Control>
                             </Form.Group>
-                            <div className="d-flex justify-content-end mt-4">
+                            <div>
                                 <Button
                                     variant="danger"
                                     onClick={() => setShowDeleteModal(true)}
@@ -207,9 +247,62 @@ const TaskDetailPage = () => {
                             </div>
                         </Card.Body>
                     </Card>
-                    <Row className="text-muted">
+                    <Row className="text-muted mb-3">
                         Created on {humanReadableDate(task.createdAt)}, updated on {humanReadableDate(task.updatedAt)}
                     </Row>
+
+                    {/* Comments Section */}
+                    <Card className="shadow-sm border-0 mb-4">
+                        <Card.Header>Comments</Card.Header>
+                        <Card.Body>
+                            <ListGroup variant="flush">
+                                {comments.map((comment) => (
+                                    <ListGroup.Item key={comment.id}>
+                                        <div className="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>{comment.author?.login}</strong>
+                                                <ReactMarkdown>{comment.content}</ReactMarkdown>
+                                                <small className="text-muted">
+                                                    Created at: {humanReadableDate(comment.createdAt)}<br />
+                                                    Updated at: {humanReadableDate(comment.updatedAt)}
+                                                </small>
+                                            </div>
+                                            {comment?.allowEdit && <Button
+                                                variant="link"
+                                                size="sm"
+                                                onClick={() => setEditingComment(comment.id)}
+                                            >
+                                                Edit
+                                            </Button>}
+                                        </div>
+                                        {editingComment === comment.id && (
+                                            <Form.Control
+                                                as="textarea"
+                                                value={comment.content}
+                                                onChange={(e) => {
+                                                    setComments(comments.map(c => c.id === comment.id ? { ...c, content: e.target.value } : c));
+                                                }}
+                                                onBlur={() => handleEditComment(comment.id, comment.content)}
+                                                autoFocus
+                                            />
+                                        )}
+                                    </ListGroup.Item>
+                                ))}
+                            </ListGroup>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                placeholder="Add a comment..."
+                                value={newCommentContent}
+                                onChange={(e) => setNewCommentContent(e.target.value)}
+                                className="mt-3"
+                            />
+                            <Button variant="primary" className="mt-2" onClick={handleCreateComment}>
+                                Add Comment
+                            </Button>
+                            {commentError && <Alert variant="danger" className="mt-2">{commentError}</Alert>}
+                        </Card.Body>
+                    </Card>
                 </>
             )}
 

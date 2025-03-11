@@ -9,6 +9,7 @@ import HomePage from './pages/HomePage';
 import Sidebar from './components/Sidebar';
 import { Container } from 'react-bootstrap';
 import TaskDetailPage from './pages/TaskDetailPage';
+import AllTasksPage from './pages/AllTasksPage';
 
 function App() {
     return (
@@ -34,6 +35,7 @@ const AppRoutes = () => {
                     <Route path="/projects" element={authToken ? <ProjectsPage /> : <Navigate to="/login" />} />
                     <Route path="/projects/:id" element={authToken ? <ProjectDetailPage /> : <Navigate to="/login" />} />
                     <Route path="/tasks/:id" element={<TaskDetailPage />} />
+                    <Route path="/all-tasks" element={<AllTasksPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </div>

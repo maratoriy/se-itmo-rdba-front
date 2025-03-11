@@ -7,6 +7,8 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { CommentRequestDto } from './models/CommentRequestDto';
+export type { CommentResponseDto } from './models/CommentResponseDto';
 export type { ProjectRequestDto } from './models/ProjectRequestDto';
 export type { ProjectResponseDto } from './models/ProjectResponseDto';
 export { TaskRequestDto } from './models/TaskRequestDto';
@@ -17,6 +19,7 @@ export type { UserRegistrationDto } from './models/UserRegistrationDto';
 export type { UserResponseDto } from './models/UserResponseDto';
 
 export { AuthControllerService } from './services/AuthControllerService';
+export { CommentControllerService } from './services/CommentControllerService';
 export { ProjectControllerService } from './services/ProjectControllerService';
 export { TaskControllerService } from './services/TaskControllerService';
 export { UserControllerService } from './services/UserControllerService';
