@@ -5,7 +5,6 @@ import { AuthContext } from '../context/AuthContext';
 import { ProjectControllerService } from '../api-client/services/ProjectControllerService';
 
 const ProjectsPage = () => {
-    const { logout } = useContext(AuthContext);
     const navigate = useNavigate();
     const [show, setShow] = useState(false);
     const [projectName, setProjectName] = useState('');
@@ -49,11 +48,6 @@ const ProjectsPage = () => {
         }
     };
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
-    };
-
     const handleProjectClick = (id) => {
         navigate(`/projects/${id}`);
     };
@@ -77,12 +71,7 @@ const ProjectsPage = () => {
 
     return (
         <Container className="mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Your Projects</h2>
-                <Button variant="outline-danger" onClick={handleLogout}>
-                    Logout
-                </Button>
-            </div>
+            <h2>Your Projects</h2>
             {error && <Alert variant="danger">{error}</Alert>}
             {success && <Alert variant="success">{success}</Alert>}
             <InputGroup className="mb-3">
@@ -111,7 +100,7 @@ const ProjectsPage = () => {
                                 setSelectedProject(project);
                                 setShowDeleteModal(true);
                             }}>
-                                <i className="bi bi-trash-fill" style={{ color: 'red' }}></i>
+                                <i className="bi bi-trash"></i>
                             </Button>
                         </td>
                     </tr>
@@ -130,7 +119,6 @@ const ProjectsPage = () => {
                 </tr>
                 </tbody>
             </Table>
-
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>

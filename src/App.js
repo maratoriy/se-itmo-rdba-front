@@ -1,11 +1,13 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
-import Home from './pages/Home';
+import HomePage from './pages/HomePage';
+import Sidebar from './components/Sidebar';
+import { Container } from 'react-bootstrap';
 
 function App() {
     return (
@@ -21,14 +23,21 @@ const AppRoutes = () => {
     const { authToken } = useContext(AuthContext);
 
     return (
-        <Routes>
-            <Route path="/" element={authToken ? <ProjectsPage /> : <Home />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-            <Route path="/projects/:id" element={<ProjectDetailPage />} />
-        </Routes>
+        <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+            {authToken && <Sidebar />}
+            <div style={{ flexGrow: 1, marginLeft: authToken ? '240px' : '0', padding: '20px' }}>
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/projects" element={authToken ? <ProjectsPage /> : <Navigate to="/login" />} />
+                    <Route path="/projects/:id" element={authToken ? <ProjectDetailPage /> : <Navigate to="/login" />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </div>
+        </div>
     );
+
 };
 
 export default App;
