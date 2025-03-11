@@ -9,6 +9,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { CommentRequestDto } from './models/CommentRequestDto';
 export type { CommentResponseDto } from './models/CommentResponseDto';
+export type { NotificationResponseDto } from './models/NotificationResponseDto';
 export type { ProjectRequestDto } from './models/ProjectRequestDto';
 export type { ProjectResponseDto } from './models/ProjectResponseDto';
 export { TaskRequestDto } from './models/TaskRequestDto';
@@ -20,6 +21,7 @@ export type { UserResponseDto } from './models/UserResponseDto';
 
 export { AuthControllerService } from './services/AuthControllerService';
 export { CommentControllerService } from './services/CommentControllerService';
+export { NotificationControllerService } from './services/NotificationControllerService';
 export { ProjectControllerService } from './services/ProjectControllerService';
 export { TaskControllerService } from './services/TaskControllerService';
 export { UserControllerService } from './services/UserControllerService';
