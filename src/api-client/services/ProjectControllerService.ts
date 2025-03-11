@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { ProjectRequestDto } from '../models/ProjectRequestDto';
 import type { ProjectResponseDto } from '../models/ProjectResponseDto';
+import type { UserResponseDto } from '../models/UserResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -83,6 +84,41 @@ export class ProjectControllerService {
             url: '/api/v1/projects',
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param projectId
+     * @param userId
+     * @returns any OK
+     * @throws ApiError
+     */
+    public static addUserToProject(
+        projectId: number,
+        userId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/projects/{projectId}/users/{userId}',
+            path: {
+                'projectId': projectId,
+                'userId': userId,
+            },
+        });
+    }
+    /**
+     * @param projectId
+     * @returns UserResponseDto OK
+     * @throws ApiError
+     */
+    public static getUsersByProjectId(
+        projectId: number,
+    ): CancelablePromise<Array<UserResponseDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/projects/{projectId}/users',
+            path: {
+                'projectId': projectId,
+            },
         });
     }
 }

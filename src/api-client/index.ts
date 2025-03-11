@@ -12,6 +12,8 @@ export type { ProjectResponseDto } from './models/ProjectResponseDto';
 export type { TokenResponseDto } from './models/TokenResponseDto';
 export type { UserLoginDto } from './models/UserLoginDto';
 export type { UserRegistrationDto } from './models/UserRegistrationDto';
+export type { UserResponseDto } from './models/UserResponseDto';
 
 export { AuthControllerService } from './services/AuthControllerService';
 export { ProjectControllerService } from './services/ProjectControllerService';
+export { UserControllerService } from './services/UserControllerService';
